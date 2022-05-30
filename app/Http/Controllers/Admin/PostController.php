@@ -76,7 +76,7 @@ class PostController extends Controller
         //salviamo il post
 
         return redirect()->route{'admin.posts.index'};
-        //redirect alla route dove ci sono tutti i post 
+        //redirect alla route dove ci sono tutti i post
     }
 
     /**
@@ -85,9 +85,10 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Post $post)
     {
         //
+        return view('admin.posts.show', compact('post'));
     }
 
     /**
@@ -99,7 +100,11 @@ class PostController extends Controller
     public function edit($id)
     {
         //
+        $post = Post::findOrFail($id);
+
+        return view('admin.posts.edit', compact('post'));
     }
+
 
     /**
      * Update the specified resource in storage.
@@ -108,9 +113,41 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+
+
     public function update(Request $request, $id)
     {
         //
+        $request->validate([
+            'title' => 'required|max:250',
+            'content' => 'required',
+        ]);
+        //validazione dati
+
+        $post = Post::findOrFail($id);
+        $postData = $request->all();
+
+        $post->fill($postData);
+
+        $slug = Str::slug($post->title);
+        $alternativeSlug = $slug;
+
+        $postFound = Post::where('slug', $slug)->first();
+        $counter = 1;
+
+        while($postFound){
+            $alternativeSlug = $slug . '_' . $counter;
+            $counter++;
+            $postFound = Post::where('slug', $alternativeSlug)->first();
+        }
+
+        $post->slug = $alternativeSlug;
+
+        $post->update();
+
+        return redirect()->route('admin.posts.index', compact('post'));
+
+
     }
 
     /**
@@ -122,5 +159,9 @@ class PostController extends Controller
     public function destroy($id)
     {
         //
+        $post = Post::findOrFail($id);
+        $post->delete();
+
+        return redirect()->route('admin.posts.index', compact('post'));
     }
 }
