@@ -32,6 +32,7 @@ class PostController extends Controller
     {
         //
         return view('admin.posts.create');
+        //ritorno la view in admin/posts/create
     }
 
     /**
@@ -47,6 +48,35 @@ class PostController extends Controller
             'title' => 'required|max:250',
             'content' => 'required',
         ]);
+        //prima di tutto lanciamo la validazione dei dati
+
+        $postData = $request->all(); //prendiamo tutti i dati
+        $newPost = new Post();//creiamo una nuova istanza di post
+        $newPost->fill($postData);//filliamo newPost instance con i dati
+        $slug = Str::slug($newPost->title);//prendo il valore di titolo che potrebbe avere caratteri particolari e lo passiamo in slug per sistemarlo
+        $alternativeSlug = $slug;//ci serve valorizzarlo uguale cosi' dopo il while possiamo avere il valore univoco corretto
+
+        $postFound = Post::where('slug', $slug)->first();
+        //definiamo una variabile, usiamo post con static method where
+        //se passiamo due parametri fa l'uguaglianza quindi se slug e' uguale al nostro slug
+        //prendiamo solo il primo record con quello slug
+
+        $counter = 1;
+        //mettiamo un numero in coda allo slug e lo facciamo partire da 1
+        while($postFound){//fintanto che postFound esiste (fintanto che un record e' uguale allo slug continuiamo a ciclare, pero' cambio lo slug da verificare)
+            $alternativeSlug = $slug . '_' . $counter;//definiamo una chiave che prende lo slug e ci aggiunge il counter
+            $counter++;//aumentiamo il contatore
+            $postFound = Post::where('slug', $alternativeSlug)->first();
+            //definiamo una variabile con all'interno il primo slug uguale al nostro slug alternativo
+        }
+
+        $newPost->slug = $alternativeSlug;
+
+        $newPost->save();
+        //salviamo il post
+
+        return redirect()->route{'admin.posts.index'};
+        //redirect alla route dove ci sono tutti i post 
     }
 
     /**
