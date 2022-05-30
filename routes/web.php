@@ -34,3 +34,9 @@ Route::middleware('auth')
 Auth::routes();
 
 // Route::get('/home', 'HomeController@index')->name('home');
+
+Route::get('{any?}', function () {
+        return view ('guest.home');
+    })->where('any', ".*");
+//questa deve essere sempre l'ultima rotta
+//serve a gestire tutti i percorsi al di fuori di quelli gia' gestiti
