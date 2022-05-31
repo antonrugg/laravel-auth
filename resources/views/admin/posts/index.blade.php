@@ -27,7 +27,19 @@
                                 <td>{{ $post->slug }}</td>
                                 <td>
                                     <a href="{{ route('admin.posts.show', ['post' => $post->id]) }}"
-                                    class="btn btn-info btn-sm"></a>
+                                    class="btn btn-info btn-sm">Dettagli</a>
+                                    <a href="{{ route('admin.posts.edit', ['post' => $post->id]) }}"
+                                    class="btn btn-warning btn-sm">Modifica</a>
+                                    <form action="{{ route('admin.posts.destroy', ['post' => $post->id]) }}"
+                                    method="post"
+                                    class="d-inline-block">
+
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        Elimina
+                                    </button>
+                                    </form>
                                 </td>
                             </tr>
                         @endforeach
@@ -36,3 +48,4 @@
             </div>
         </div>
     </div>
+@endsection

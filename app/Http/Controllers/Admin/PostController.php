@@ -102,6 +102,7 @@ class PostController extends Controller
     public function show(Post $post)
     {
         //
+        // $post = Post::findOrFail($id);
         if(!$post){
             abort(404);
         }
@@ -133,7 +134,7 @@ class PostController extends Controller
      */
 
 
-    public function update(Request $request, $id)
+    public function update(Request $request, Post $post)
     {
         //
         $request->validate([
@@ -148,12 +149,12 @@ class PostController extends Controller
         ]);
         //validazione dati
 
-        $post = Post::findOrFail($id);
+        // $post = Post::findOrFail($id);
         $postData = $request->all();
 
         $post->fill($postData);
 
-        $newPost->slug = Post::convertToSlug($newPost->title);
+        $post->slug = Post::convertToSlug($post->title);
 
         $post->update();
 

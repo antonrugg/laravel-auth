@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 class Post extends Model
 {
     //
+    protected $table = 'posts';
     protected $fillable = ['title', 'content', 'slug'];
 
     //take a string as input and return a unique slug version
