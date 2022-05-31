@@ -17,13 +17,20 @@ use Illuminate\Support\Facades\Route;
 //     return view('welcome');
 // });
 
+Auth::routes(['register' => false, 'reset' => false, 'verify' => false]);
+//passiamo un array per bloccare le routes quando abbiamo gia' un admin registrato
+//in questo modo nessuno potra' registrarsi come admin a parte noi
+
+// Route::get('/home', 'HomeController@index')->name('home');
+
+
 Route::middleware('auth')
     ->namespace('Admin')
     ->name('admin.')
     ->prefix('admin')
     ->group(function () {
-        Route::get('/', 'HomeController@index')
-        ->name('home');
+        Route::get('/', 'HomeController@index')->name('index');
+        Route::resource('/posts', 'PostController');
     });
 //il middleware e' il sfotware intermedio che quando chiamiamo una determinata rotta
 //ci passa attraverso e controlla l'autenticazione
@@ -31,9 +38,9 @@ Route::middleware('auth')
 //prende tutte le rotte con il prefisso admin(gli uri della rotta) e il nome della rotta (route:list come riferimento)
 
 
-Auth::routes();
 
-// Route::get('/home', 'HomeController@index')->name('home');
+
+
 
 Route::get('{any?}', function () {
         return view ('guest.home');

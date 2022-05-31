@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
+
 use App\Post;
 
 class PostController extends Controller
@@ -44,38 +45,51 @@ class PostController extends Controller
     public function store(Request $request)
     {
         //
-        $request->validate([
+         $request->validate([
             'title' => 'required|max:250',
-            'content' => 'required',
+            'content' => 'required|min:5',
+        ],
+        [
+            'title.required' =>'Titolo deve essere valorizzato.',
+            'title.max' =>'Hai superato i 250 caratteri.',
+            'content.required' => 'Il contenuto deve essere compilato.',
+            'content.min' => 'Minimo 5 caratteri.'
+            //modifichiamo il messaggio di errore standard
         ]);
-        //prima di tutto lanciamo la validazione dei dati
+        //validazione dati
 
         $postData = $request->all(); //prendiamo tutti i dati
         $newPost = new Post();//creiamo una nuova istanza di post
         $newPost->fill($postData);//filliamo newPost instance con i dati
-        $slug = Str::slug($newPost->title);//prendo il valore di titolo che potrebbe avere caratteri particolari e lo passiamo in slug per sistemarlo
-        $alternativeSlug = $slug;//ci serve valorizzarlo uguale cosi' dopo il while possiamo avere il valore univoco corretto
+        // $slug = Str::slug($newPost->title);//prendo il valore di titolo che potrebbe avere caratteri particolari e lo passiamo in slug per sistemarlo
 
-        $postFound = Post::where('slug', $slug)->first();
+        // dd($slug);//dump test per vedere lo slug prima
+        // dd($alternativeSlug)
+
+        // $alternativeSlug = $slug;//ci serve valorizzarlo uguale cosi' dopo il while possiamo avere il valore univoco corretto
+
+        // $postFound = Post::where('slug', $slug)->first();
         //definiamo una variabile, usiamo post con static method where
         //se passiamo due parametri fa l'uguaglianza quindi se slug e' uguale al nostro slug
-        //prendiamo solo il primo record con quello slug
+        //prendiamo solo il primo record con quello slug ->first()
 
-        $counter = 1;
+        // $counter = 1;
         //mettiamo un numero in coda allo slug e lo facciamo partire da 1
-        while($postFound){//fintanto che postFound esiste (fintanto che un record e' uguale allo slug continuiamo a ciclare, pero' cambio lo slug da verificare)
-            $alternativeSlug = $slug . '_' . $counter;//definiamo una chiave che prende lo slug e ci aggiunge il counter
-            $counter++;//aumentiamo il contatore
-            $postFound = Post::where('slug', $alternativeSlug)->first();
+        // while($postFound){//fintanto che postFound esiste (fintanto che un record e' uguale allo slug continuiamo a ciclare, pero' cambio lo slug da verificare)
+            // $alternativeSlug = $slug . '_' . $counter;//definiamo una chiave che prende lo slug e ci aggiunge il counter
+            // $counter++;//aumentiamo il contatore
+            // $postFound = Post::where('slug', $alternativeSlug)->first();
             //definiamo una variabile con all'interno il primo slug uguale al nostro slug alternativo
-        }
+        // }
 
-        $newPost->slug = $alternativeSlug;
+        // $newPost->slug = $alternativeSlug;
+        $newPost->slug = Post::convertToSlug($newPost->title);
+        //funzione nel model Post
 
         $newPost->save();
         //salviamo il post
 
-        return redirect()->route{'admin.posts.index'};
+        return redirect()->route('admin.posts.index');
         //redirect alla route dove ci sono tutti i post
     }
 
@@ -88,6 +102,10 @@ class PostController extends Controller
     public function show(Post $post)
     {
         //
+        if(!$post){
+            abort(404);
+        }
+        //al post del findOrFail per provare
         return view('admin.posts.show', compact('post'));
     }
 
@@ -120,7 +138,13 @@ class PostController extends Controller
         //
         $request->validate([
             'title' => 'required|max:250',
-            'content' => 'required',
+            'content' => 'required|min:5',
+        ],
+        [
+            'title.required' =>'Titolo deve essere valorizzato',
+            'title.max' =>'Hai superato i 250 caratteri',
+            'content.min' => 'Minimo 5 caratteri'
+            //modifichiamo il messaggio di errore standard
         ]);
         //validazione dati
 
@@ -129,19 +153,7 @@ class PostController extends Controller
 
         $post->fill($postData);
 
-        $slug = Str::slug($post->title);
-        $alternativeSlug = $slug;
-
-        $postFound = Post::where('slug', $slug)->first();
-        $counter = 1;
-
-        while($postFound){
-            $alternativeSlug = $slug . '_' . $counter;
-            $counter++;
-            $postFound = Post::where('slug', $alternativeSlug)->first();
-        }
-
-        $post->slug = $alternativeSlug;
+        $newPost->slug = Post::convertToSlug($newPost->title);
 
         $post->update();
 
